@@ -1,0 +1,54 @@
+{
+  "chat_bot_1": [
+    {
+      "sender": "user",
+      "message": "\u4f60\u597d",
+      "timestamp": "2026-03-04T21:40:52.843Z"
+    },
+    {
+      "sender": "bot",
+      "message": "\u6211\u4e5f\u6709\u7c7b\u4f3c\u7684\u7ecf\u5386\uff0c\u611f\u89c9\u5f88\u68d2\u3002",
+      "timestamp": "2026-03-04T21:40:54.185Z"
+    },
+    {
+      "sender": "user",
+      "message": "\uff1f",
+      "timestamp": "2026-03-04T21:40:56.821Z"
+    },
+    {
+      "sender": "bot",
+      "message": "\u8fd9\u4e2a\u8bdd\u9898\u5f88\u6709\u8da3\uff0c\u80fd\u8be6\u7ec6\u8bf4\u8bf4\u5417\uff1f",
+      "timestamp": "2026-03-04T21:40:58.171Z"
+    },
+    {
+      "sender": "user",
+      "message": "\u55ef",
+      "timestamp": "2026-03-04T21:41:03.496Z"
+    },
+    {
+      "sender": "bot",
+      "message": "\u8c22\u8c22\u4f60\u7684\u5206\u4eab\uff0c\u6211\u5f88\u559c\u6b22\u3002",
+      "timestamp": "2026-03-04T21:41:04.831Z"
+    },
+    {
+      "sender": "user",
+      "message": "\uff1f\uff1f\uff1f",
+      "timestamp": "2026-03-04T21:41:07.299Z"
+    },
+    {
+      "sender": "bot",
+      "message": "\u4f60\u597d\uff01\u5f88\u9ad8\u5174\u8ba4\u8bc6\u4f60\u3002",
+      "timestamp": "2026-03-04T21:41:08.646Z"
+    },
+    {
+      "sender": "user",
+      "message": "cnm",
+      "timestamp": "2026-03-04T21:41:11.887Z"
+    },
+    {
+      "sender": "bot",
+      "message": "\u6211\u89c9\u5f97\u6211\u4eec\u6709\u5f88\u591a\u5171\u540c\u70b9\u5462\uff01",
+      "timestamp": "2026-03-04T21:41:13.231Z"
+    }
+  ]
+}

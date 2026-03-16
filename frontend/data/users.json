@@ -1,0 +1,19 @@
+[
+  {
+    "name": "\u6e1d\u5dde\u597d\u4eba",
+    "age": 19,
+    "gender": "male",
+    "location": "\u6b66\u6c49",
+    "hobbies": [
+      "reading",
+      "sports",
+      "gaming",
+      "art"
+    ],
+    "personality": "\u559c\u6b22\u64b8\u7ba1",
+    "communication_style": "\u5443\u5443\u5443",
+    "ideal_partner": "\u5443\u5443\u5443\u9999\u8349",
+    "chat_habits": "\u55e1\u55e1\u55e1",
+    "id": "user_1"
+  }
+]
