@@ -4,10 +4,6 @@
       <h1>个人画像</h1>
       <form @submit.prevent="submitProfile">
         <div class="form-group">
-          <label for="name">姓名</label>
-          <input type="text" id="name" v-model="profile.name" required>
-        </div>
-        <div class="form-group">
           <label for="age">年龄</label>
           <input type="number" id="age" v-model="profile.age" required>
         </div>
@@ -138,7 +134,6 @@ import axios from 'axios';
 const router = useRouter();
 
 const profile = ref({
-  name: '',
   age: '',
   gender: '',
   occupation: '',
@@ -148,8 +143,10 @@ const profile = ref({
   chat_habits: ''
 });
 
-const hobbies = ref(['阅读', '运动', '音乐', '旅行', '电影', '美食', '游戏', '艺术', '摄影', '健身', '瑜伽', '舞蹈', '编程', '绘画', '书法', '手工', '烹饪', '烘焙', '园艺', '钓鱼', '露营', '攀岩', '滑雪', '冲浪', '潜水', '骑行', '徒步', '冥想', '动漫', '电竞', '桌游', '手账']);
+const hobbies = ref(['阅读', '运动', '音乐', '旅行', '电影', '美食', '游戏', '艺术', '摄影', '健身', '瑜伽', '舞蹈', '编程', '绘画', '书法', '手工', '烹饪', '烘焙', '园艺', '钓鱼', '露营', '攀岩', '滑雪', '冲浪', '潜水', '骑行', '徒步', '冥想', '动漫', '电竞', '桌游', '手帐', '火漆印章', '滴胶', '微缩景观', '簇绒', '编织', '金工', '石膏娃娃', '粘土软陶', '胶片摄影', 'CCD相机', 'Vlog记录', '无人机航拍', 'Plog', '拍立得', '城市漫步', '路亚', '飞盘', '陆冲', '异宠', '水族造景', '多肉植物', '生态瓶', '机械键盘', '3D打印', '私有云', '现场音乐', '黑胶唱片', '乐队乐器', '音乐剧', '盲盒潮玩', '谷子周边', '中古古着', '香水香薰', '手冲咖啡', '精酿啤酒', '书法篆刻', '占星塔罗', '调酒', '攒钱记账', '逛菜市场', '观星', '射箭', '搏击', '茶道', '木工', '滑板', '剧本杀', '塔罗牌', '脱口秀', '逛博物馆']);
 const selectedHobbies = ref([]);
+
+const avatar = ref('');
 
 
 
@@ -216,7 +213,6 @@ const loadProfile = async () => {
     const response = await axios.get(`http://localhost:5000/api/profile/${user.id}`);
     if (response.data.status === 'success' && response.data.profile) {
       const profileData = response.data.profile;
-      profile.value.name = profileData.name || '';
       profile.value.age = profileData.age || '';
       profile.value.gender = profileData.gender || '';
       profile.value.occupation = profileData.occupation || '';
@@ -230,7 +226,10 @@ const loadProfile = async () => {
         selectedHobbies.value = profileData.hobbies.split(',');
       }
       
-
+      // 处理头像
+      if (profileData.avatar) {
+        avatar.value = profileData.avatar;
+      }
       
       // 处理CARRP答案
       if (profileData.carrp_answers) {
@@ -311,6 +310,7 @@ const submitProfile = async () => {
       hobbies: selectedHobbies.value.join(','),
       carrp_answers: carrpAnswers.value.join(','),
       nri_answers: nriAnswers.value.join(','),
+      avatar: avatar.value,
       user_id: user.id
     };
     

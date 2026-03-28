@@ -116,7 +116,7 @@ const checkUserIntent = async () => {
     if (profileResponse.data.status === 'success' && profileResponse.data.profile) {
       const profile = profileResponse.data.profile;
       // 检查个人画像是否完成
-      if (!profile.name || !profile.age || !profile.gender || !profile.occupation || !profile.sexual_orientation || !profile.personality || !profile.communication_style) {
+      if (!profile.age || !profile.gender || !profile.occupation || !profile.sexual_orientation || !profile.personality || !profile.communication_style) {
         alert('请先完成个人画像的填写，然后再访问聊天广场');
         router.push('/profile');
         return;

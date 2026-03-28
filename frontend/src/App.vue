@@ -62,7 +62,7 @@
           <li v-if="user" class="mobile-user-profile">
             <div class="mobile-user-info" @click="toggleSidebar">
               <img :src="userAvatar" alt="用户头像" class="avatar-img">
-              <span class="user-name">{{ user.name || user.username }}</span>
+              <span class="user-name">{{ user.username }}</span>
               <span v-if="notificationCount > 0" class="avatar-badge">{{ notificationCount }}</span>
             </div>
             <button @click="logout" class="mobile-logout-btn">退出登录</button>

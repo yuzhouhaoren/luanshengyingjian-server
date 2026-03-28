@@ -11,8 +11,8 @@
             </label>
           </div>
           <div class="user-details">
-            <h1 class="username">{{ user.name || user.username || '用户' }}</h1>
-            <p class="user-id">ID: {{ user.id }}</p>
+            <h1 class="username">{{ user.username || '用户' }}</h1>
+            <p class="user-id">ID: {{ user.id || '加载中...' }}</p>
           </div>
         </div>
         <div class="header-actions">
@@ -189,6 +189,14 @@ const loadUserProfile = async () => {
   const userObj = JSON.parse(savedUser)
   const userId = userObj.id
   
+  // 先显示本地存储的基本信息
+  user.value = {
+    ...user.value,
+    id: userId,
+    username: userObj.username,
+    email: userObj.email
+  }
+  
   try {
     const response = await axios.get(`http://localhost:5000/api/profile/${userId}`)
     if (response.data.status === 'success' && response.data.profile) {
@@ -196,7 +204,6 @@ const loadUserProfile = async () => {
       user.value = {
         id: userId,
         username: profile.username || userObj.username || '',
-        name: profile.name || '',
         age: profile.age,
         gender: profile.gender || '',
         occupation: profile.occupation || '',
@@ -213,6 +220,11 @@ const loadUserProfile = async () => {
     }
   } catch (error) {
     console.error('加载用户信息失败:', error)
+    // 即使API调用失败，也保持本地存储的基本信息
+    user.value = {
+      ...user.value,
+      avatar: defaultAvatar
+    }
   }
 }
 

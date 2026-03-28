@@ -49,10 +49,6 @@
       <!-- 个人信息设置 -->
       <form v-if="activeTab === 'profile'" @submit.prevent="submitProfile">
         <div class="form-group">
-          <label for="name">姓名</label>
-          <input type="text" id="name" v-model="profile.name" required>
-        </div>
-        <div class="form-group">
           <label for="age">年龄</label>
           <input type="number" id="age" v-model="profile.age" required>
         </div>
@@ -204,7 +200,6 @@ const submitProfile = async () => {
   try {
     const response = await axios.post('http://localhost:5000/api/profile', {
       user_id: userId,
-      name: profile.value.name,
       age: profile.value.age,
       gender: profile.value.gender,
       occupation: profile.value.occupation,

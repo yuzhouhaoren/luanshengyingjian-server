@@ -5,6 +5,7 @@ import json
 import os
 import base64
 import time
+import uuid
 
 app = Flask(__name__)
 
@@ -30,9 +31,24 @@ def static_file(path):
 # 数据库连接
 def get_db():
     # SQLite连接
-    conn = sqlite3.connect('dating.db')
+    conn = sqlite3.connect('dating.db', timeout=30.0)
     conn.row_factory = sqlite3.Row
     return conn
+
+# 数据库上下文管理器
+from contextlib import contextmanager
+
+@contextmanager
+def get_db_context():
+    conn = get_db()
+    try:
+        yield conn
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e
+    finally:
+        conn.close()
 
 # 初始化数据库
 def init_db():
@@ -175,36 +191,36 @@ def health_check():
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
-    conn = get_db()
-    cursor = conn.cursor()
     
-    # 检查用户名是否已存在
-    cursor.execute('SELECT * FROM users WHERE username = ?', (data.get('username'),))
-    if cursor.fetchone():
-        conn.close()
-        return jsonify({'status': 'error', 'message': '用户名已存在'})
-    
-    # 检查邮箱是否已存在
-    cursor.execute('SELECT * FROM users WHERE email = ?', (data.get('email'),))
-    if cursor.fetchone():
-        conn.close()
-        return jsonify({'status': 'error', 'message': '邮箱已存在'})
-    
-    # 生成用户ID
-    cursor.execute('SELECT COUNT(*) FROM users')
-    count = cursor.fetchone()[0]
-    user_id = f"user_{count + 1}"
-    
-    # 插入用户数据
-    cursor.execute('''
-    INSERT INTO users (id, username, email, password)
-    VALUES (?, ?, ?, ?)
-    ''', (user_id, data.get('username'), data.get('email'), data.get('password')))
-    
-    conn.commit()
-    conn.close()
-    
-    return jsonify({'status': 'success', 'user_id': user_id, 'username': data.get('username'), 'email': data.get('email')})
+    try:
+        with get_db_context() as conn:
+            cursor = conn.cursor()
+            
+            # 检查用户名是否已存在
+            cursor.execute('SELECT * FROM users WHERE username = ?', (data.get('username'),))
+            if cursor.fetchone():
+                return jsonify({'status': 'error', 'message': '用户名已存在'})
+            
+            # 检查邮箱是否已存在
+            cursor.execute('SELECT * FROM users WHERE email = ?', (data.get('email'),))
+            if cursor.fetchone():
+                return jsonify({'status': 'error', 'message': '邮箱已存在'})
+            
+            # 生成用户ID
+            import uuid
+            user_id = f"user_{uuid.uuid4().hex[:8]}"
+            
+            # 插入用户数据
+            cursor.execute('''
+            INSERT INTO users (id, username, email, password)
+            VALUES (?, ?, ?, ?)
+            ''', (user_id, data.get('username'), data.get('email'), data.get('password')))
+        
+        return jsonify({'status': 'success', 'user_id': user_id, 'username': data.get('username'), 'email': data.get('email')})
+    except sqlite3.OperationalError as e:
+        if 'locked' in str(e):
+            return jsonify({'status': 'error', 'message': '数据库繁忙，请稍后重试'})
+        raise e
 
 # 用户登录
 @app.route('/api/login', methods=['POST'])
@@ -288,11 +304,11 @@ def submit_profile():
         
         # 更新用户画像
         cursor.execute('''
-        UPDATE users SET name = ?, age = ?, gender = ?, occupation = ?, sexual_orientation = ?, hobbies = ?, 
+        UPDATE users SET age = ?, gender = ?, occupation = ?, sexual_orientation = ?, hobbies = ?, 
         personality = ?, communication_style = ?, ideal_partner = ?, chat_habits = ?, 
         carrp_answers = ?, nri_answers = ?, profile_scores = ?, avatar = ?
         WHERE id = ?
-        ''', (data.get('name'), data.get('age'), data.get('gender'), data.get('occupation'), data.get('sexual_orientation'),
+        ''', (data.get('age'), data.get('gender'), data.get('occupation'), data.get('sexual_orientation'),
               data.get('hobbies'), data.get('personality'), 
               data.get('communication_style'), data.get('ideal_partner'), 
               data.get('chat_habits'), data.get('carrp_answers'), 
