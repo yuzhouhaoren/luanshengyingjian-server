@@ -321,6 +321,56 @@ def submit_profile():
         conn.close()
         return jsonify({'status': 'error', 'message': '用户不存在'})
 
+# 保存用户题目答案（自动保存）
+@app.route('/api/profile/answers', methods=['POST'])
+def save_profile_answers():
+    data = request.get_json(silent=True) or {}
+
+    # 兼容浏览器卸载阶段的 keepalive/sendBeacon 请求体
+    if not data:
+        raw_body = request.get_data(as_text=True) or ''
+        if raw_body:
+            try:
+                data = json.loads(raw_body)
+            except Exception:
+                data = {}
+
+    if not data and request.form:
+        data = request.form.to_dict()
+
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': '缺少用户ID'})
+
+    carrp_answers = data.get('carrp_answers', '')
+    nri_answers = data.get('nri_answers', '')
+
+    try:
+        with get_db_context() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,))
+            if not cursor.fetchone():
+                return jsonify({'status': 'error', 'message': '用户不存在'})
+
+            cursor.execute('''
+            UPDATE users
+            SET carrp_answers = ?, nri_answers = ?
+            WHERE id = ?
+            ''', (carrp_answers, nri_answers, user_id))
+
+        return jsonify({
+            'status': 'success',
+            'user_id': user_id,
+            'carrp_answers': carrp_answers,
+            'nri_answers': nri_answers
+        })
+    except sqlite3.OperationalError as e:
+        if 'locked' in str(e):
+            return jsonify({'status': 'error', 'message': '数据库繁忙，请稍后重试'})
+        raise e
+
 # 获取用户画像
 @app.route('/api/profile/<user_id>', methods=['GET'])
 def get_profile(user_id):
