@@ -2,16 +2,18 @@
 
 # 孪生映见 - Linux服务器部署脚本
 # 公网IP: 101.133.238.8
+# 项目路径: /home/admin/projects
 
 set -e
 
 echo "=========================================="
 echo "  孪生映见 - 部署脚本"
 echo "  服务器IP: 101.133.238.8"
+echo "  项目路径: /home/admin/projects"
 echo "=========================================="
 
 # 配置变量
-APP_DIR="/var/www/dating-app"
+APP_DIR="/home/admin/projects"
 BACKEND_DIR="$APP_DIR/backend"
 FRONTEND_DIR="$APP_DIR/frontend"
 NGINX_CONF="/etc/nginx/sites-available/dating-app"
@@ -52,7 +54,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
+User=admin
 WorkingDirectory=$BACKEND_DIR
 Environment="PATH=$BACKEND_DIR/venv/bin"
 ExecStart=$BACKEND_DIR/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
@@ -90,6 +92,7 @@ echo "  部署完成！"
 echo "=========================================="
 echo ""
 echo "访问地址: http://101.133.238.8"
+echo "项目路径: /home/admin/projects"
 echo ""
 echo "常用命令:"
 echo "  查看后端日志: sudo journalctl -u dating-app-backend -f"

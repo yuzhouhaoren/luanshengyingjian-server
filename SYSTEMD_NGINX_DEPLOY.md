@@ -4,9 +4,8 @@
 
 项目已经配置完成，包含以下关键文件：
 
-- **nginx.conf** - Nginx反向代理配置
-- **deploy.sh** - 自动化部署脚本
-- **DEPLOY.md** - 部署文档
+- **nginx.conf** - Nginx反向代理配置（已配置 /home/admin/projects 路径）
+- **deploy.sh** - 自动化部署脚本（已配置 /home/admin/projects 路径）
 - **backend/app.py** - 已更新CORS配置
 - **frontend/src/config/api.js** - 已配置相对路径API
 
@@ -19,46 +18,47 @@
 ssh root@101.133.238.8
 ```
 
-### 2. 安装Git（如果未安装）
+### 2. 创建目录并克隆项目
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y git
-```
+# 创建 /home/admin 目录（如果不存在）
+sudo mkdir -p /home/admin
+sudo chown admin:admin /home/admin
 
-### 3. 克隆项目
+# 切换到 admin 用户
+su - admin
 
-```bash
-# 克隆项目到 /var/www 目录
-sudo git clone https://github.com/yuzhouhaoren/luanshengyingjian-server /var/www/dating-app
+# 创建项目目录
+mkdir -p /home/admin/projects
 
-# 进入项目目录
-cd /var/www/dating-app
+# 克隆项目
+cd /home/admin/projects
+git clone https://github.com/yuzhouhaoren/luanshengyingjian-server .
 
 # 给脚本添加执行权限
 chmod +x deploy.sh
 ```
 
-### 4. 执行部署脚本
+### 3. 执行部署脚本
 
 ```bash
 # 执行部署脚本
 ./deploy.sh
 ```
 
-### 5. 手动部署步骤（如果脚本执行失败）
+### 4. 手动部署步骤（如果脚本执行失败）
 
-#### 5.1 安装依赖
+#### 4.1 安装依赖
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y python3 python3-pip python3-venv nginx nodejs npm
 ```
 
-#### 5.2 配置后端
+#### 4.2 配置后端
 
 ```bash
-cd /var/www/dating-app/backend
+cd /home/admin/projects/backend
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
@@ -66,7 +66,7 @@ pip install -r requirements.txt
 pip install gunicorn
 ```
 
-#### 5.3 创建systemd服务文件
+#### 4.3 创建systemd服务文件
 
 创建文件 `/etc/systemd/system/dating-app-backend.service`：
 
@@ -77,10 +77,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
-WorkingDirectory=/var/www/dating-app/backend
-Environment="PATH=/var/www/dating-app/backend/venv/bin"
-ExecStart=/var/www/dating-app/backend/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
+User=admin
+WorkingDirectory=/home/admin/projects/backend
+Environment="PATH=/home/admin/projects/backend/venv/bin"
+ExecStart=/home/admin/projects/backend/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
 Restart=always
 RestartSec=3
 
@@ -88,18 +88,18 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-#### 5.4 构建前端
+#### 4.4 构建前端
 
 ```bash
-cd /var/www/dating-app/frontend
+cd /home/admin/projects/frontend
 npm install
 npm run build
 ```
 
-#### 5.5 配置Nginx
+#### 4.5 配置Nginx
 
 ```bash
-sudo cp /var/www/dating-app/nginx.conf /etc/nginx/sites-available/dating-app
+sudo cp /home/admin/projects/nginx.conf /etc/nginx/sites-available/dating-app
 sudo ln -sf /etc/nginx/sites-available/dating-app /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
@@ -107,7 +107,7 @@ sudo systemctl restart nginx
 sudo systemctl enable nginx
 ```
 
-#### 5.6 启动后端服务
+#### 4.6 启动后端服务
 
 ```bash
 sudo systemctl daemon-reload
@@ -167,7 +167,7 @@ sudo tail -f /var/log/nginx/access.log
 ## 目录结构
 
 ```
-/var/www/dating-app/
+/home/admin/projects/
 ├── backend/              # Flask后端
 │   ├── app.py           # 主应用文件
 │   ├── requirements.txt # Python依赖
@@ -179,8 +179,7 @@ sudo tail -f /var/log/nginx/access.log
 │   ├── src/            # 源代码
 │   └── package.json    # Node依赖
 ├── nginx.conf          # Nginx配置
-├── deploy.sh           # 部署脚本
-└── DEPLOY.md           # 部署文档
+└── deploy.sh           # 部署脚本
 ```
 
 ## 故障排查
@@ -192,7 +191,7 @@ sudo tail -f /var/log/nginx/access.log
 sudo journalctl -u dating-app-backend -n 50
 
 # 手动测试后端
-sudo -u www-data bash -c 'cd /var/www/dating-app/backend && source venv/bin/activate && python app.py'
+cd /home/admin/projects/backend && source venv/bin/activate && python app.py
 ```
 
 ### Nginx 502错误
@@ -212,10 +211,10 @@ sudo tail -f /var/log/nginx/error.log
 
 ```bash
 # 检查前端构建文件
-ls -la /var/www/dating-app/frontend/dist/
+ls -la /home/admin/projects/frontend/dist/
 
 # 重新构建前端
-cd /var/www/dating-app/frontend
+cd /home/admin/projects/frontend
 npm run build
 
 # 检查Nginx配置
@@ -226,10 +225,10 @@ cat /etc/nginx/sites-available/dating-app
 
 ```bash
 # 检查CORS配置
-cat /var/www/dating-app/backend/app.py | grep -A 5 -B 5 CORS
+cat /home/admin/projects/backend/app.py | grep -A 5 -B 5 CORS
 
 # 检查前端API配置
-cat /var/www/dating-app/frontend/src/config/api.js
+cat /home/admin/projects/frontend/src/config/api.js
 
 # 测试API直接访问
 curl http://localhost:5000/api/health
@@ -276,16 +275,16 @@ sudo certbot renew --dry-run
 ```bash
 #!/bin/bash
 
-BACKUP_DIR="/var/backup/dating-app"
+BACKUP_DIR="/home/admin/backup/dating-app"
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
 mkdir -p $BACKUP_DIR
 
 # 备份数据库
-cp /var/www/dating-app/backend/dating.db $BACKUP_DIR/dating_${DATE}.db
+cp /home/admin/projects/backend/dating.db $BACKUP_DIR/dating_${DATE}.db
 
 # 备份头像
-zip -r $BACKUP_DIR/avatars_${DATE}.zip /var/www/dating-app/backend/avatars/
+zip -r $BACKUP_DIR/avatars_${DATE}.zip /home/admin/projects/backend/avatars/
 
 echo "备份完成: $BACKUP_DIR"
 ```
@@ -299,7 +298,7 @@ echo "备份完成: $BACKUP_DIR"
 ```ini
 # 根据服务器CPU核心数调整worker数量
 # 一般为 (CPU核心数 * 2) + 1
-ExecStart=/var/www/dating-app/backend/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
+ExecStart=/home/admin/projects/backend/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app
 ```
 
 ### 2. Nginx缓存配置
@@ -322,8 +321,8 @@ proxy_cache_valid 404 1m;
 
 ```bash
 # 进入后端目录
-cd /var/www/dating-app/backend
+cd /home/admin/projects/backend
 
 # 执行VACUUM
-sudo -u www-data sqlite3 dating.db "VACUUM;"
+sqlite3 dating.db "VACUUM;"
 ```
