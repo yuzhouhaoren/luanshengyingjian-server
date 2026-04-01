@@ -286,6 +286,7 @@ import {
 } from "vue";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const router = useRouter();
 const AI_CHAT_API_ENDPOINT = "https://api.placeholder.chat/3k9x2m7nq1";
@@ -408,8 +409,7 @@ const collectedChatRecords = ref([]);
 const isProfileLoading = ref(false);
 const answersAutoSaveState = ref("idle");
 const answersAutoSaveMessage = ref("");
-const PROFILE_ANSWER_AUTO_SAVE_ENDPOINT =
-  "http://localhost:5000/api/profile/answers";
+const PROFILE_ANSWER_AUTO_SAVE_ENDPOINT = API_ENDPOINTS.profileSubmit;
 let answerAutoSaveTimer = null;
 const lastSavedAnswerSignature = ref("");
 
@@ -833,9 +833,7 @@ const loadProfile = async () => {
       return;
     }
 
-    const response = await axios.get(
-      `http://localhost:5000/api/profile/${user.id}`,
-    );
+    const response = await axios.get(API_ENDPOINTS.profile(user.id));
     if (response.data.status === "success" && response.data.profile) {
       const profileData = response.data.profile;
       profile.value.age = profileData.age || "";
@@ -959,10 +957,7 @@ const submitProfile = async () => {
       user_id: user.id,
     };
 
-    const response = await axios.post(
-      "http://localhost:5000/api/profile",
-      profileData,
-    );
+    const response = await axios.post(API_ENDPOINTS.profileSubmit, profileData);
     if (response.data.status === "success") {
       lastSavedAnswerSignature.value = answerSignature.value;
       updateAnswerAutoSaveState("saved", "题目答案已保存");

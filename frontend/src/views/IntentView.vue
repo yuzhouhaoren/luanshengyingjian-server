@@ -69,6 +69,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api.js';
 
 const router = useRouter();
 const selectedIntent = ref(null);
@@ -86,7 +87,7 @@ const loadCompletedIntents = async () => {
   if (!user) return;
   
   try {
-    const response = await axios.get('http://localhost:5000/api/intent/' + user.id);
+    const response = await axios.get(API_ENDPOINTS.intent(user.id));
     if (response.data.status === 'success') {
       const intents = response.data.data.intents;
       completedIntents.value = intents.map(intent => intent.intent_type);
@@ -869,7 +870,7 @@ const loadSavedAnswers = async () => {
   if (!user || !selectedIntent.value) return;
   
   try {
-    const response = await axios.get('http://localhost:5000/api/intent/' + user.id);
+    const response = await axios.get(API_ENDPOINTS.intent(user.id));
     if (response.data.status === 'success') {
       const intents = response.data.data.intents;
       const savedIntent = intents.find(intent => intent.intent_type === selectedIntent.value);
@@ -1072,7 +1073,7 @@ const submitAnswers = async () => {
     
     console.log('提交的数据:', intentData);
     
-    const response = await axios.post('http://localhost:5000/api/intent', intentData);
+    const response = await axios.post(API_ENDPOINTS.intentSubmit, intentData);
     console.log('API响应:', response.data);
     
     if (response.data.status === 'success') {

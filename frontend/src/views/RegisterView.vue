@@ -57,6 +57,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { API_ENDPOINTS } from '../config/api.js'
 
 const router = useRouter()
 const form = ref({
@@ -72,9 +73,9 @@ const handleRegister = async () => {
   loading.value = true
   error.value = ''
   success.value = ''
-  
+
   try {
-    const response = await axios.post('http://localhost:5000/api/register', form.value)
+    const response = await axios.post(API_ENDPOINTS.register, form.value)
     if (response.data.status === 'success') {
       success.value = '注册成功！正在跳转到登录页面...'
       localStorage.setItem('user', JSON.stringify({

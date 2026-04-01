@@ -44,6 +44,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { API_ENDPOINTS } from '../config/api.js'
 
 const router = useRouter()
 const form = ref({
@@ -56,9 +57,9 @@ const error = ref('')
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
-    const response = await axios.post('http://localhost:5000/api/login', form.value)
+    const response = await axios.post(API_ENDPOINTS.login, form.value)
     if (response.data.status === 'success') {
       localStorage.setItem('user', JSON.stringify({
         id: response.data.user_id,

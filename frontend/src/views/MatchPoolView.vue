@@ -65,6 +65,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
+import { API_ENDPOINTS } from '../config/api.js'
 
 const countdown = ref({
   days: 0,
@@ -154,8 +155,8 @@ const fetchMatchResults = async () => {
   try {
     const userId = localStorage.getItem('userId')
     if (!userId) return
-    
-    const response = await axios.get(`http://localhost:5000/api/matches/${userId}`)
+
+    const response = await axios.get(API_ENDPOINTS.matches(userId))
     if (response.data.status === 'success') {
       matchResults.value = response.data.matches
     }

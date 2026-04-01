@@ -232,6 +232,7 @@
 import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
+import { API_ENDPOINTS } from "./config/api.js";
 
 const router = useRouter();
 const route = useRoute();
@@ -299,9 +300,7 @@ const checkUserStatus = async () => {
 // 获取通知数量
 const fetchNotificationCount = async (userId) => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/notifications/${userId}`,
-    );
+    const response = await axios.get(API_ENDPOINTS.notifications(userId));
     if (response.data.status === "success") {
       notificationCount.value = response.data.data.total;
     }
@@ -314,13 +313,11 @@ const fetchNotificationCount = async (userId) => {
 // 获取用户头像
 const fetchUserAvatar = async (userId) => {
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/profile/${userId}`,
-    );
+    const response = await axios.get(API_ENDPOINTS.profile(userId));
     if (response.data.status === "success" && response.data.profile) {
       const profile = response.data.profile;
       if (profile.avatar) {
-        userAvatar.value = `http://localhost:5000/avatars/${profile.avatar}`;
+        userAvatar.value = API_ENDPOINTS.avatar(profile.avatar);
       } else {
         userAvatar.value =
           "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20user%20avatar&image_size=square";
@@ -559,12 +556,9 @@ const confirmDeleteAccount = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       if (user) {
         // 调用后端API注销账号
-        const response = await axios.post(
-          "http://localhost:5000/api/account/delete",
-          {
-            user_id: user.id,
-          },
-        );
+        const response = await axios.post(API_ENDPOINTS.deleteAccount, {
+          user_id: user.id,
+        });
 
         if (response.data.status === "success") {
           localStorage.removeItem("user");

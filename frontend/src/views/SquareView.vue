@@ -81,6 +81,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api.js';
 
 const router = useRouter();
 const users = ref([]);
@@ -112,7 +113,7 @@ const checkUserIntent = async () => {
   
   try {
     // 检查用户的个人画像是否完成
-    const profileResponse = await axios.get(`http://localhost:5000/api/profile/${user.id}`);
+    const profileResponse = await axios.get(API_ENDPOINTS.profile(user.id));
     if (profileResponse.data.status === 'success' && profileResponse.data.profile) {
       const profile = profileResponse.data.profile;
       // 检查个人画像是否完成
@@ -124,7 +125,7 @@ const checkUserIntent = async () => {
     }
     
     // 检查用户的匹配意向
-    const response = await axios.get('http://localhost:5000/api/intent/' + user.id);
+    const response = await axios.get(API_ENDPOINTS.intent(user.id));
     if (response.data.status === 'success') {
       const intents = response.data.data.intents;
       if (intents.length === 0) {
@@ -154,7 +155,7 @@ const checkUserIntent = async () => {
 
 const fetchUsers = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/users');
+    const response = await axios.get(API_ENDPOINTS.users);
     if (response.data.status === 'success') {
       users.value = response.data.data.users;
     }
@@ -186,7 +187,7 @@ const switchIntent = async () => {
   if (!user) return;
   
   try {
-    const response = await axios.get('http://localhost:5000/api/intent/' + user.id);
+    const response = await axios.get(API_ENDPOINTS.intent(user.id));
     if (response.data.status === 'success') {
       const intents = response.data.data.intents;
       if (intents.length > 1) {
@@ -248,7 +249,7 @@ const sendMessage = async () => {
     // 保存聊天记录到后端
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
-      await axios.post('http://localhost:5000/api/chat', {
+      await axios.post(API_ENDPOINTS.chat, {
         chat_id: `chat_${user.id}_${selectedBot.value.id}`,
         sender: user.id,
         message: userMessage,
@@ -265,9 +266,9 @@ const sendFriendRequest = async () => {
   if (!user || !selectedBot.value) return;
   
   try {
-    const response = await axios.post('http://localhost:5000/api/friend/request', {
-      sender_id: user.id,
-      receiver_id: selectedBot.value.user_id || selectedBot.value.id
+    const response = await axios.post(API_ENDPOINTS.intentRequestSend, {
+      from_user_id: user.id,
+      to_user_id: selectedBot.value.user_id || selectedBot.value.id
     });
     
     if (response.data.status === 'success') {

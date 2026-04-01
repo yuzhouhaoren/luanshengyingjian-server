@@ -100,6 +100,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
+import { API_ENDPOINTS } from '../config/api.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -169,7 +170,7 @@ const platformPersonality = ref({
 const fetchStats = async () => {
   try {
     console.log('开始获取统计数据...');
-    const response = await axios.get('http://localhost:5000/api/stats')
+    const response = await axios.get(API_ENDPOINTS.stats)
     console.log('获取统计数据成功:', response.data);
     if (response.data.status === 'success') {
       matchStats.value.total_users = response.data.data.total_users
@@ -193,7 +194,7 @@ const fetchStats = async () => {
   // 获取用户个人画像数据
   if (user.value) {
     try {
-      const profileResponse = await axios.get(`http://localhost:5000/api/profile/${user.value.id}`)
+      const profileResponse = await axios.get(API_ENDPOINTS.profile(user.value.id))
       if (profileResponse.data.status === 'success' && profileResponse.data.profile) {
         const profile = profileResponse.data.profile
         if (profile.profile_scores) {
@@ -216,7 +217,7 @@ const fetchStats = async () => {
   
   // 获取平台用户性格分布数据
   try {
-    const platformResponse = await axios.get('http://localhost:5000/api/personality/stats')
+    const platformResponse = await axios.get(API_ENDPOINTS.personalityStats)
     if (platformResponse.data.status === 'success') {
       platformPersonality.value = platformResponse.data.data
       console.log('获取平台性格分布数据成功:', platformPersonality.value);

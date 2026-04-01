@@ -9,8 +9,8 @@ import uuid
 
 app = Flask(__name__)
 
-# 启用CORS 跨域资源共享
-CORS(app, origins=['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176']) 
+# 启用CORS 跨域资源共享 - 生产环境配置
+CORS(app, origins=['http://101.133.238.8', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176']) 
 
 # 数据库配置
 # 使用SQLite数据库

@@ -146,6 +146,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api.js";
 
 const router = useRouter();
 const activeTab = ref("general");
@@ -202,9 +203,7 @@ const loadProfile = async () => {
   if (!userId) return;
 
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/profile/${userId}`,
-    );
+    const response = await axios.get(API_ENDPOINTS.profile(userId));
     if (response.data.status === "success" && response.data.profile) {
       const data = response.data.profile;
       profile.value = {
@@ -238,7 +237,7 @@ const submitProfile = async () => {
   const userId = userObj.id;
 
   try {
-    const response = await axios.post("http://localhost:5000/api/profile", {
+    const response = await axios.post(API_ENDPOINTS.profileSubmit, {
       user_id: userId,
       age: profile.value.age,
       gender: profile.value.gender,
@@ -266,12 +265,9 @@ const confirmDeleteAccount = async () => {
       if (savedUser) {
         const userObj = JSON.parse(savedUser);
         // 调用后端API注销账号
-        const response = await axios.post(
-          "http://localhost:5000/api/account/delete",
-          {
-            user_id: userObj.id,
-          },
-        );
+        const response = await axios.post(API_ENDPOINTS.deleteAccount, {
+          user_id: userObj.id,
+        });
 
         if (response.data.status === "success") {
           localStorage.removeItem("user");

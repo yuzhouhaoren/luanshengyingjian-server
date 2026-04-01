@@ -144,6 +144,7 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
+import { API_ENDPOINTS } from '../config/api.js'
 
 const user = ref({
   id: '',
@@ -198,7 +199,7 @@ const loadUserProfile = async () => {
   }
   
   try {
-    const response = await axios.get(`http://localhost:5000/api/profile/${userId}`)
+    const response = await axios.get(API_ENDPOINTS.profile(userId))
     if (response.data.status === 'success' && response.data.profile) {
       const profile = response.data.profile
       user.value = {
@@ -210,7 +211,7 @@ const loadUserProfile = async () => {
         sexual_orientation: profile.sexual_orientation || '',
         hobbies: profile.hobbies || '',
         personality: profile.personality || '',
-        avatar: profile.avatar ? `http://localhost:5000/avatars/${profile.avatar}` : defaultAvatar,
+        avatar: profile.avatar ? API_ENDPOINTS.avatar(profile.avatar) : defaultAvatar,
         profile_scores: profile.profile_scores ? JSON.parse(profile.profile_scores) : {}
       }
       
@@ -236,7 +237,7 @@ const loadNotifications = async () => {
   const userId = userObj.id
   
   try {
-    const response = await axios.get(`http://localhost:5000/api/notifications/${userId}`)
+    const response = await axios.get(API_ENDPOINTS.notifications(userId))
     if (response.data.status === 'success') {
       notificationCount.value = response.data.data.total
     }
@@ -248,12 +249,12 @@ const loadNotifications = async () => {
 const loadMatchResults = async () => {
   const savedUser = localStorage.getItem('user')
   if (!savedUser) return
-  
+
   const userObj = JSON.parse(savedUser)
   const userId = userObj.id
-  
+
   try {
-    const response = await axios.get(`http://localhost:5000/api/matches/${userId}`)
+    const response = await axios.get(API_ENDPOINTS.matches(userId))
     if (response.data.status === 'success') {
       matchResults.value = response.data.matches
     }
@@ -265,12 +266,12 @@ const loadMatchResults = async () => {
 const loadFriendRequests = async () => {
   const savedUser = localStorage.getItem('user')
   if (!savedUser) return
-  
+
   const userObj = JSON.parse(savedUser)
   const userId = userObj.id
-  
+
   try {
-    const response = await axios.get(`http://localhost:5000/api/friend-requests/${userId}`)
+    const response = await axios.get(API_ENDPOINTS.intentRequests(userId))
     if (response.data.status === 'success') {
       friendRequests.value = response.data.requests
     }
@@ -294,7 +295,7 @@ const formatTime = (timestamp) => {
 
 const acceptMatch = async (match) => {
   try {
-    await axios.post('http://localhost:5000/api/matches/accept', { match_id: match.id })
+    await axios.post(API_ENDPOINTS.matchAccept, { match_id: match.id })
     loadMatchResults()
     loadNotifications()
   } catch (error) {
@@ -304,7 +305,7 @@ const acceptMatch = async (match) => {
 
 const rejectMatch = async (match) => {
   try {
-    await axios.post('http://localhost:5000/api/matches/reject', { match_id: match.id })
+    await axios.post(API_ENDPOINTS.matchReject, { match_id: match.id })
     loadMatchResults()
     loadNotifications()
   } catch (error) {
@@ -314,7 +315,7 @@ const rejectMatch = async (match) => {
 
 const acceptRequest = async (request) => {
   try {
-    await axios.post('http://localhost:5000/api/friend-request/accept', { request_id: request.id })
+    await axios.post(API_ENDPOINTS.intentRequestAccept, { request_id: request.id })
     loadFriendRequests()
     loadNotifications()
   } catch (error) {
@@ -324,7 +325,7 @@ const acceptRequest = async (request) => {
 
 const rejectRequest = async (request) => {
   try {
-    await axios.post('http://localhost:5000/api/friend-request/reject', { request_id: request.id })
+    await axios.post(API_ENDPOINTS.intentRequestReject, { request_id: request.id })
     loadFriendRequests()
     loadNotifications()
   } catch (error) {
@@ -340,17 +341,17 @@ const handleAvatarUpload = async (event) => {
     formData.append('user_id', user.value.id)
     
     try {
-      const response = await axios.post('http://localhost:5000/api/avatar/upload', formData, {
+      const response = await axios.post(API_ENDPOINTS.avatarUpload, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       })
-      
+
       if (response.data.status === 'success') {
-        user.value.avatar = `http://localhost:5000${response.data.avatar_path}`
+        user.value.avatar = API_ENDPOINTS.avatar(response.data.avatar_path.replace('/avatars/', ''))
         // 触发全局事件，通知App.vue更新头像
-        window.dispatchEvent(new CustomEvent('avatar-updated', { 
-          detail: { avatar: user.value.avatar } 
+        window.dispatchEvent(new CustomEvent('avatar-updated', {
+          detail: { avatar: user.value.avatar }
         }))
         alert('头像上传成功！')
       } else {
